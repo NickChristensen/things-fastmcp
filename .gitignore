@@ -180,3 +180,6 @@ set_token_directly.py
 # MCP development
 *.log
 logs/ 
+
+# Claude
+.claude/
