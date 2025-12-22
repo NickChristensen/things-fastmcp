@@ -6,6 +6,7 @@ Provides structured logging with multiple outputs and log levels.
 import logging
 import logging.handlers
 import os
+import sys
 import json
 import re
 from datetime import datetime
@@ -197,7 +198,7 @@ def setup_logging(
     root_logger.addFilter(redaction_filter)
     
     # Console handler with simple formatting
-    console_handler = logging.StreamHandler()
+    console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(getattr(logging, console_level.upper()))
     console_format = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -249,7 +250,7 @@ def setup_logging(
     error_file_handler.addFilter(operation_filter)
     error_file_handler.addFilter(redaction_filter)
     root_logger.addHandler(error_file_handler)
-    
+
     # Log the logging configuration
     logger = logging.getLogger(__name__)
     logger.info(
