@@ -33,6 +33,10 @@ SENSITIVE_FIELDS = {
     "checklist_items",
     "stderr",
     "stdout",
+    "password",
+    "client_secret",
+    "authorization",
+    "credentials",
 }
 
 def _is_sensitive_field(field_name: Optional[str]) -> bool:

@@ -29,6 +29,8 @@ from .logging_config import setup_logging, get_logger, log_operation_start, log_
 # Import caching
 from .cache import cached, invalidate_caches_for, get_cache_stats, CACHE_TTL
 from .tag_handler import ensure_tags_exist
+# Import authentication
+from .auth import create_oauth_provider, get_oauth_config
 
 # Load environment variables from .env file
 load_dotenv()
@@ -212,6 +214,32 @@ def _create_fastmcp_instance() -> FastMCP:
         kwargs["icons"] = ICONS
     else:
         logger.debug("FastMCP runtime does not support icons; skipping metadata field")
+
+    # Configure OAuth if credentials are present
+    oauth_provider = create_oauth_provider()
+    if oauth_provider:
+        from pydantic import AnyHttpUrl
+        from mcp.server.auth.settings import AuthSettings, ClientRegistrationOptions
+
+        oauth_config = get_oauth_config()
+        if oauth_config:
+            client_id, client_secret, issuer_url = oauth_config
+
+            logger.info(f"Configuring OAuth 2.1 authentication (issuer: {issuer_url})")
+
+            # Configure auth settings
+            kwargs["auth"] = AuthSettings(
+                issuer_url=AnyHttpUrl(issuer_url),
+                service_documentation_url=None,
+                client_registration_options=ClientRegistrationOptions(
+                    enabled=False  # Disable DCR - using pre-configured client
+                ),
+                required_scopes=None,  # No scope restrictions
+                resource_server_url=AnyHttpUrl(issuer_url),  # We're both AS and RS
+            )
+
+            # Provide the OAuth provider for handling auth requests
+            kwargs["auth_server_provider"] = oauth_provider
 
     return FastMCP("Things", **kwargs)
 
@@ -857,7 +885,16 @@ def run_things_mcp_server():
     else:
         logger.info("Things app is running and ready for operations")
 
+    # Security warning if exposing to network without HTTPS and OAuth is enabled
+    oauth_config = get_oauth_config()
+    if oauth_config and host != DEFAULT_HOST:
+        logger.warning(
+            "⚠️  SECURITY WARNING: Exposing OAuth server to network without HTTPS! "
+            "Use HTTPS/TLS in production to protect tokens and credentials."
+        )
+
     # Run the MCP server with HTTP transport
+    # OAuth endpoints will be automatically available if configured
     mcp.run(transport="streamable-http")
 
 if __name__ == "__main__":
