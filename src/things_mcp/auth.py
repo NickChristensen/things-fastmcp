@@ -118,9 +118,12 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
         In a full implementation, this would redirect to a user consent page.
         For simplicity, we'll auto-approve and generate an authorization code.
 
+        Note: redirect_uri validation is already performed by the MCP framework
+        before this method is called (exact matching against client.redirect_uris).
+
         Args:
             client: The requesting client
-            params: Authorization parameters
+            params: Authorization parameters (redirect_uri already validated)
 
         Returns:
             Redirect URL with authorization code
@@ -129,21 +132,6 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
             AuthorizeError: If the request is invalid
         """
         logger.info(f"Authorization request from client {client.client_id[:8]}...")
-
-        # Validate redirect URI
-        redirect_uri_str = str(params.redirect_uri)
-        valid_redirect = False
-        for allowed_uri in client.redirect_uris:
-            if redirect_uri_str.startswith(str(allowed_uri)):
-                valid_redirect = True
-                break
-
-        if not valid_redirect:
-            logger.error(f"Invalid redirect_uri: {redirect_uri_str}")
-            raise AuthorizeError(
-                error="invalid_request",
-                error_description=f"Invalid redirect_uri: {redirect_uri_str}"
-            )
 
         # Generate authorization code (160+ bits of entropy as recommended)
         code = secrets.token_urlsafe(32)  # 256 bits
