@@ -130,8 +130,36 @@ def _build_icon(src: str, *, sizes: Optional[List[str]] = None, mime_type: Optio
 
 ICONS: List[IconLike] = [
     _build_icon(
-        src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F4DD.png",
+        src="https://things-mcp.nickchristensen.house/apple-touch-icon.png",
+        sizes=["180x180", "any"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/1024.png",
+        sizes=["1024x1024"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/16.png",
+        sizes=["16x16"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/32.png",
+        sizes=["32x32"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/64.png",
         sizes=["64x64"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/128.png",
+        sizes=["128x128"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/256.png",
+        sizes=["256x256"],
+    ),
+    _build_icon(
+        src="https://things-mcp.nickchristensen.house/512.png",
+        sizes=["512x512"],
     ),
 ]
 
