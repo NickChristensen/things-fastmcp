@@ -73,10 +73,10 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
             return None
 
         # Return our pre-configured client
-        # ChatGPT's redirect URIs include:
-        # - https://chatgpt.com/connector_platform_oauth_redirect (MCP connectors)
-        # - https://chat.openai.com/aip/{app-id}/oauth/callback (older format)
-        # We'll accept any chat.openai.com or chatgpt.com redirect URI
+        # Supported redirect URIs:
+        # - ChatGPT: https://chatgpt.com/connector_platform_oauth_redirect (MCP connectors)
+        # - ChatGPT: https://chat.openai.com/aip/{app-id}/oauth/callback (older format)
+        # - Claude: https://claude.ai/api/mcp/auth_callback
         return OAuthClientInformationFull(
             client_id=self.client_id,
             client_secret=self.client_secret,
@@ -86,7 +86,8 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
               AnyUrl("https://chatgpt.com/aip/"),
               AnyUrl("https://chat.openai.com/"),
               AnyUrl("https://chatgpt.com/"),
-              AnyUrl("https://chatgpt.com/connector_platform_oauth_redirect")
+              AnyUrl("https://chatgpt.com/connector_platform_oauth_redirect"),
+              AnyUrl("https://claude.ai/api/mcp/auth_callback")
             ],
             response_types=["code"],
             token_endpoint_auth_method="client_secret_post",
