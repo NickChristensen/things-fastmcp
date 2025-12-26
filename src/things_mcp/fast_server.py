@@ -9,12 +9,14 @@ import asyncio
 import traceback
 from functools import lru_cache
 from typing import Dict, Any, Optional, List, Union
+from pathlib import Path
 import inspect
 import things
 from dotenv import load_dotenv
 
 from mcp.server.fastmcp import FastMCP
 import mcp.types as types
+from fastapi.staticfiles import StaticFiles
 
 # Import supporting modules
 from .formatters import format_todo, format_project, format_area, format_tag
@@ -246,6 +248,24 @@ def _create_fastmcp_instance() -> FastMCP:
 
 # Create the FastMCP server
 mcp = _create_fastmcp_instance()
+
+# Mount static files directory at root path
+# Determine the static folder path (project root/static)
+_current_file = Path(__file__)
+_project_root = _current_file.parent.parent.parent  # Go up from src/things_mcp/ to project root
+_static_dir = _project_root / "static"
+
+# Create static directory if it doesn't exist
+_static_dir.mkdir(exist_ok=True)
+
+# Mount static files if the FastMCP instance has an underlying FastAPI app
+# Mounted at "/" so files are accessible at root (e.g., /favicon.ico)
+# MCP routes take precedence, static files only serve if no route matches
+if hasattr(mcp, 'app'):
+    mcp.app.mount("/", StaticFiles(directory=str(_static_dir)), name="static")
+    logger.info(f"Static files mounted at / (serving from {_static_dir})")
+else:
+    logger.warning("Unable to mount static files - FastMCP instance doesn't expose app attribute")
 
 # LIST VIEWS
 
