@@ -92,6 +92,7 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
             response_types=["code"],
             token_endpoint_auth_method="client_secret_post",
             client_name="ChatGPT MCP Client",
+            scope="claudeai",  # Allow Claude's requested scope
         )
 
     async def register_client(self, client_info: OAuthClientInformationFull) -> None:
