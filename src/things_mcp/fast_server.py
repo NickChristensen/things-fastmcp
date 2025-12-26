@@ -16,7 +16,8 @@ from dotenv import load_dotenv
 
 from mcp.server.fastmcp import FastMCP
 import mcp.types as types
-from fastapi.staticfiles import StaticFiles
+from starlette.staticfiles import StaticFiles
+from starlette.routing import Mount
 
 # Import supporting modules
 from .formatters import format_todo, format_project, format_area, format_tag
@@ -258,14 +259,13 @@ _static_dir = _project_root / "static"
 # Create static directory if it doesn't exist
 _static_dir.mkdir(exist_ok=True)
 
-# Mount static files if the FastMCP instance has an underlying FastAPI app
+# Add static files mount to FastMCP's custom routes
 # Mounted at "/" so files are accessible at root (e.g., /favicon.ico)
 # MCP routes take precedence, static files only serve if no route matches
-if hasattr(mcp, 'app'):
-    mcp.app.mount("/", StaticFiles(directory=str(_static_dir)), name="static")
-    logger.info(f"Static files mounted at / (serving from {_static_dir})")
-else:
-    logger.warning("Unable to mount static files - FastMCP instance doesn't expose app attribute")
+mcp._custom_starlette_routes.append(
+    Mount("/", StaticFiles(directory=str(_static_dir)), name="static")
+)
+logger.info(f"Static files mounted at / (serving from {_static_dir})")
 
 # LIST VIEWS
 
