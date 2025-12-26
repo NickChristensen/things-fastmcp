@@ -355,6 +355,21 @@ class SimpleOAuthProvider(OAuthAuthorizationServerProvider[AuthorizationCode, Re
             AccessToken object if valid, None otherwise
         """
         logger.info(f"load_access_token called with token: {token[:16]}...")
+
+        # Check for pre-allowed token from environment
+        pre_allowed_token = os.getenv("OAUTH_PRE_ALLOWED_TOKEN")
+        if pre_allowed_token and token == pre_allowed_token:
+            logger.info(f"Token matched pre-allowed token from environment")
+            # Return a non-expiring access token for the pre-allowed token
+            return AccessToken(
+                token=token,
+                client_id=self.client_id,
+                scopes=[],
+                expires_at=None,  # Non-expiring
+                resource=None,
+            )
+
+        # Fall back to OAuth flow tokens
         access_token = self._access_tokens.get(token)
 
         if not access_token:
